@@ -59,6 +59,7 @@ make_validation_plot <- function(models, validation_data,
 #' @param output_type function. The output type for the plot, by default \code{\link[grDevices]{png}}.
 #' @param filename character. Path to save output png file (for only a single plot_type).
 #' @param ... additional arguments to \code{\link[graphics]{plot}}.
+#' @param validation_object validation_object. Internal parameter.
 #' @rdname make_validation_plot
 output_validation_plot <- function(validation_object, scale = 1, output_type = png,
                                    filename = NULL, ...) {
@@ -70,7 +71,7 @@ output_validation_plot <- function(validation_object, scale = 1, output_type = p
     on.exit(dev.off(), add = TRUE)
   }
 
-  plot(results, scale = scale, ...)
+  plot(validation_object, scale = scale, ...)
 }
 
 validate_model <- function(model) {

@@ -2,14 +2,18 @@
 % Please edit documentation in R/make_validation_plot.R
 \name{make_validation_plot}
 \alias{make_validation_plot}
+\alias{output_validation_plot}
 \alias{validation_plot}
 \title{Create a plot representing a Hosmer-Lemeshow goodness-of-fit test.}
 \usage{
 make_validation_plot(models, validation_data, buckets = 10,
-  dep_var_name = "dep_var")
+  dep_var_name = "dep_var", id_var_name = "id", plot = TRUE, ...)
+
+output_validation_plot(validation_object, scale = 1, output_type = png,
+  filename = NULL, ...)
 
 validation_plot(models, validation_data, buckets = 10,
-  dep_var_name = "dep_var")
+  dep_var_name = "dep_var", id_var_name = "id", plot = TRUE, ...)
 }
 \arguments{
 \item{models}{list or numeric. If a numeric vector, this will be
@@ -44,6 +48,22 @@ model objects.}
 This will be used to extract a column out of the \code{validation_data}
 for comparison against the fitted risk scores. By default,
 \code{"dep_var"}.}
+
+\item{id_var_name}{character. The name of the ID variable. By default,
+simply \code{"id"}.}
+
+\item{plot}{logical. Whether or not to plot to an output device
+straight away, by default \code{TRUE}.}
+
+\item{...}{additional arguments to \code{\link[graphics]{plot}}.}
+
+\item{validation_object}{validation_object. Internal parameter.}
+
+\item{scale}{numeric. Adjust plot size, by default \code{1}.}
+
+\item{output_type}{function. The output type for the plot, by default \code{\link[grDevices]{png}}.}
+
+\item{filename}{character. Path to save output png file (for only a single plot_type).}
 }
 \description{
 Create a plot representing a Hosmer-Lemeshow goodness-of-fit test.

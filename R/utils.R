@@ -12,7 +12,7 @@ is.simple_string <- function(string) {
 #'
 #' A logical string is (a) logical, (b) length 1, and (c) not NA.
 #'
-#' @param string ANY. An R object.
+#' @param logical ANY. An R object.
 #' @return TRUE or FALSE according it is a simple logical.
 is.simple_logical <- function(logical) {
   is.logical(logical) && length(logical) == 1 && !is.na(logical)
