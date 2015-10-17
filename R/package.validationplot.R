@@ -1,0 +1,17 @@
+#' R plotting tools for visualizing a Hosmer-Lemeshow test on a binary classifier.
+#'
+#' The performance of any binary classifier that provides a probabilistic
+#' output (rather than a binary value) can be visualized by
+#' splitting the target validation population into quantiles
+#' of a fixed count (usually 10, that is, deciles) and comparing
+#' the empirical incidence of the dependent variable to the
+#' probabilistic response outputted by the classifier.
+#'
+#' The validationplot package makes this endeavour straightforward,
+#' especially in conjunction with the \code{tundra} package.
+#'
+#' @note The package was originally authored by physicist Ryland Ely.
+#' @name validationplot
+#' @import ggplot2
+#' @docType package
+NULL
