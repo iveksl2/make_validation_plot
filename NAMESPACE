@@ -2,4 +2,6 @@
 
 export(make_validation_plot)
 export(validation_plot)
+import(crayon)
 import(ggplot2)
+import(pROC)

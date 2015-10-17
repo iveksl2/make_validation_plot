@@ -14,6 +14,7 @@ Depends:
 License: MIT
 LazyData: true
 Imports:
+    crayon,
     ggplot2,
     pROC
 Suggests:

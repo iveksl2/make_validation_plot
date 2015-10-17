@@ -32,7 +32,56 @@
 #' @export
 make_validation_plot <- function(models, validation_data,
                                  buckets = 10, dep_var_name = "dep_var") {
-  
+  if (!is.list(models)) { 
+    models <- list(models)
+  }
+  models <- lapply(models, validate_model)
+
+  for (model in models) {
+    index <- index + 1
+    model_name <- names(models)[[index]]
+
+    # create s3 class to store validation information
+    validation_object <- structure(list(), class = "validation_object")
+    if (model_name == "" || is.null(model_name)) model_name <- paste0("Model ", index)
+    validation_object$model_name <- model_name
+
+    # get the ordered response (actual and predicted)
+    if (is(model, "tundraContainer")) {
+      scores <- model$predict(validation_data)
+    } else if (is.vector(model)) {
+      scores <- model
+      if (length(scores) != nrow(validation_data)) stop('prediction vector argument of unequal length of validation dataframe')
+    }
+
+    # warn user that something is wrong
+    if (all(is.na(scores))) {
+      stop("All predictions are NA")
+    } else if (any(is.na(scores))) {
+      warning("Some predictions are NA")
+      keep <- !is.na(scores)
+      scores <- scores[keep]
+      validation_data <- validation_data[keep, ]
+    } else if (length(unique(scores)) == 1) {
+      stop("Predictions are all identical!")
+    }
+
+    my_roc <- pROC::ci(factor(validation_data[[dep_var_name]]), scores, of = 'auc')
+
+    # compute validation metrics
+    validation_object$roc = my_roc[2]
+    validation_object$roc_le = my_roc[2] - my_roc[1] # lower error
+    validation_object$roc_ue = my_roc[3] - my_roc[2] # upper error
+  }
+}
+
+validate_model <- function(model) {
+  if (!is.numeric(model) && !is(model, "tundraContainer")) {
+    stop("Currently, only numeric and tundraContainer inputs are ",
+         "accepted in the first argument to ",
+         sQuote("make_validation_plot"), "; instead, I received a ",
+         sQuote(crayon::red(class(model)[1L])))
+  }
 }
 
 #' @rdname make_validation_plot
