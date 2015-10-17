@@ -6,10 +6,13 @@ output (rather than a binary value) can be visualized by
 splitting the target validation population into quantiles
 of a fixed count (usually 10, that is, deciles) and comparing
 the empirical incidence of the dependent variable to the
-probabilistic response outputted by the classifier.
+probabilistic response outputted by the classifier. This is
+meant to represent a visualization of the [Hosmer-Lemeshow goodness
+of fit test](https://en.wikipedia.org/wiki/Hosmer%E2%80%93Lemeshow_test)
 
 The validationplot package makes this endeavour straightforward,
-especially in conjunction with the \code{tundra} package.
+especially in conjunction with the [tundra](https://github.com/robertzk/tundra)
+package.
 
 ## Installation
 
