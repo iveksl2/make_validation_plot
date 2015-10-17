@@ -2,9 +2,13 @@
 % Please edit documentation in R/make_validation_plot.R
 \name{make_validation_plot}
 \alias{make_validation_plot}
+\alias{validation_plot}
 \title{Create a plot representing a Hosmer-Lemeshow goodness-of-fit test.}
 \usage{
 make_validation_plot(models, validation_data, buckets = 10,
+  dep_var_name = "dep_var")
+
+validation_plot(models, validation_data, buckets = 10,
   dep_var_name = "dep_var")
 }
 \arguments{

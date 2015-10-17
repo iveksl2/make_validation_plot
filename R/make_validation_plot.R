@@ -35,6 +35,7 @@ make_validation_plot <- function(models, validation_data,
   
 }
 
+#' @rdname make_validation_plot
 #' @export
 validation_plot <- make_validation_plot
 
