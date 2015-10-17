@@ -17,6 +17,7 @@ Imports:
     ggplot2,
     pROC
 Suggests:
+    tundra,
     knitr,
     testthat
 Roxygen: list(wrap = FALSE)
