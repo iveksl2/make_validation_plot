@@ -1,5 +1,5 @@
 ## Hosmer-Lemeshow Test Visualization
-[![Build Status](https://travis-ci.org/avantcredit/make_validation_plot.svg?branch=master)](https://travis-ci.org/avantcredit/validationplot) [![Coverage Status](https://coveralls.io/repos/avantcredit/validationplot/badge.svg?branch=master)](https://coveralls.io/r/avantcredit/make_validation_plot)
+[![Build Status](https://travis-ci.org/avantcredit/make_validation_plot.svg?branch=master)](https://travis-ci.org/avantcredit/validationplot) [![Coverage Status](https://coveralls.io/repos/avantcredit/make_validation_plot/badge.svg?branch=master&service=github)](https://coveralls.io/r/avantcredit/make_validation_plot) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://avantcredit.github.io/make_validation_plot/)
 
 The performance of any binary classifier that provides a probabilistic
 output (rather than a binary value) can be visualized by
