@@ -418,6 +418,14 @@ make_validation_object.numeric <- function(scores, validation_data, buckets,
 #' @export
 validation_plot <- make_validation_plot
 
+# Normalized RMSD to faciliate comparison between datasets with different scales
+NormalizedRMSD <- function(y_actual, y_pred){
+  if(max(y_actual) == min(y_actual)){
+    stop("the indicator is homogenous and uninformative")
+  }
+  RMSD(y_actual, y_pred)/( max(y_actual) - min(y_actual) )
+}
+
 default_colors <- function(num) {
   colors <- c("#BE5050FF", "#9BBA5FFF", "#8065A1FF",
     "#F5954FFF", "#1E2A36FF", "#43AC47FF")
