@@ -44,9 +44,10 @@ make_validation_plot <- function(models, validation_data,
   if (!is.list(models)) { models <- list(models) }
   models <- lapply(models, validate_model)
 
-  validation_object <-
+  validation_object <- structure(class = "validation_object_list",
     make_validation_object(models, validation_data, buckets,
                            dep_var_name, id_var_name)
+  )
 
   if (isTRUE(plot)) {
     output_validation_plot(validation_object, ...)
@@ -59,11 +60,11 @@ make_validation_plot <- function(models, validation_data,
 #' @param output_type function. The output type for the plot, by default \code{\link[grDevices]{png}}.
 #' @param filename character. Path to save output png file (for only a single plot_type).
 #' @param ... additional arguments to \code{\link[graphics]{plot}}.
-#' @param validation_object validation_object. Internal parameter.
+#' @param validation_object_list validation_object_list. Internal parameter.
 #' @rdname make_validation_plot
-output_validation_plot <- function(validation_object, scale = 1, output_type = grDevices::png,
+output_validation_plot <- function(validation_object_list, scale = 1, output_type = grDevices::png,
                                    filename = NULL, ...) {
-  stopifnot(is(validation_object, "validation_object"))
+  stopifnot(is(validation_object_list, "validation_object_list"))
   stopifnot(is.function(output_type))
 
   # Plot the results.
@@ -72,7 +73,7 @@ output_validation_plot <- function(validation_object, scale = 1, output_type = g
     on.exit(dev.off(), add = TRUE)
   }
 
-  plot(validation_object, scale = scale, ...)
+  plot(validation_object_list, scale = scale, ...)
 }
 
 #' @rdname plot_validation_object_list
@@ -284,6 +285,7 @@ validate_model <- function(model) {
          sQuote("make_validation_plot"), "; instead, I received a ",
          sQuote(crayon::red(class(model)[1L])))
   }
+  model
 }
 
 # The following Gini definition is adapted from https://www.kaggle.com/wiki/RCodeForGini
@@ -332,7 +334,7 @@ make_validation_object <- function(scores, ...) {
 }
 
 make_validation_object.list <- function(scores, ...) {
-  structure(lapply(seq_along(scores), function(i) {
+  structure(lapply(seq_along(scores), function(i, ...) {
     model_name <- names(scores)[i]                  
     if (model_name == "" || is.null(model_name)) {
       model_name <- paste0("Model ", i)
