@@ -61,8 +61,9 @@ make_validation_plot <- function(models, validation_data,
 #' @param ... additional arguments to \code{\link[graphics]{plot}}.
 #' @param validation_object validation_object. Internal parameter.
 #' @rdname make_validation_plot
-output_validation_plot <- function(validation_object, scale = 1, output_type = png,
+output_validation_plot <- function(validation_object, scale = 1, output_type = grDevices::png,
                                    filename = NULL, ...) {
+  stopifnot(is(validation_object, "validation_object"))
   stopifnot(is.function(output_type))
 
   # Plot the results.
@@ -72,6 +73,200 @@ output_validation_plot <- function(validation_object, scale = 1, output_type = p
   }
 
   plot(validation_object, scale = scale, ...)
+}
+
+#' Plot a \code{validation_plot} object.
+#'
+#' @param validation_object_list list. The validation objects to plot.
+#' @param ylab character. (For plot_type = "standard" only. Default is "Default (\%)")
+#' @param title character. The title of the plot, by default \code{NULL} for 
+#'    no title.
+#' @param linecolors character. For plot_type = "standard" only.
+#'    Vector of colors for each model. Default is rainbow.
+#' @param line_types character. "Solid", "dashed" or "dotted", by default the former.
+#' @param plotroc logical. Whether to print ROC in legend.
+#' @param numbers logical. Whether to print number of defaults in
+#'    each bucket above the plotted point, but only if you are
+#'    plotting a single model. Default is \code{TRUE}.
+#' @param showpoints logical. If \code{TRUE}, print only lines
+#'    on validation graph, not points.
+#' @param increment integer. Increments of y-axis scale, in percent.
+#'    Default = 10.
+#' @param n_per_row integer.
+#' @param scale integer. If different than 1, used to scale output image.
+#' @param use_normalizer logical. 
+#' @export
+plot.validation_object_list <- function(validation_object_list, ylab = "Default (%)",
+                                        title = NULL, linecolors = c(), line_types = NULL,
+                                        plotroc = TRUE, numbers = TRUE, showpoints = FALSE,
+                                        increment = 10, n_per_row = 1, scale = 1,
+                                        use_normalizer = FALSE) {
+
+  # mean responses for all models
+  if (use_normalizer) {
+    all_responses <- unlist(lapply(validation_object_list, function(x) x$normalized_mean_response))
+    buckets <- length(validation_object_list[[1]]$normalized_mean_response)
+  } else {
+    all_responses <- unlist(lapply(validation_object_list, function(x) x$mean_response))
+    buckets <- length(validation_object_list[[1]]$mean_response)
+  }
+  number_of_obs <- sum(validation_object_list[[1]]$bucket_size)
+
+  # set up plot parameters
+  if (missing(increment)) { # automatically set plot increment if user doesn't specify
+      rr <- max(all_responses, na.rm=TRUE) - min(all_responses, na.rm=TRUE)
+      n <- ceiling(log10(rr/5))
+      x <- c(10^(n-1), 2*10^(n-1), 5*10^(n-1), 10^n, 2*10^n, 5*10^n)
+      m <- rr/x
+      inc <- x[m == m[which.min(abs(m[m >= 4] - 5))]]
+  } else {
+      inc <- increment/100
+  }
+  ymin <- floor(min(all_responses, na.rm=TRUE)/inc) * inc
+  ymax <- ceiling(max(all_responses, na.rm=TRUE)/inc) * inc
+
+  # set up plot
+  op <- par(oma = c(5,2,0,0), mgp = c(3,1,0), bty='l', yaxs='i', xpd=NA)
+  plot(c(1,buckets), c(ymin, ymax),
+       xaxt = 'n', yaxt = 'n',
+       xlab = '', ylab = '', type = 'n',)
+  axis(side = 1, at = 1:buckets, cex = scale, cex.axis = scale)
+
+  if ('gini' %in% names(validation_object_list[[1]])) { # y-axis is unbounded
+    axis(side = 2, las = 2,
+         at = seq(ymin+inc, ymax, by = inc),
+         labels = seq(ymin+inc, ymax, by = inc), cex.axis = scale)
+    ylab = "mean y_prediction in each decile"
+  } else { # y-axis is a pct
+    axis(side = 2, las = 2,
+         at = seq(ymin+inc, ymax, by = inc),
+         labels = sapply(seq(ymin+inc, ymax,by = inc), function(x) paste0(100*x,'%')), cex.axis = scale)
+  }
+  if (buckets == 10) {
+    mtext("Decile", 1, 3, font=2, cex=1.2*scale)
+  } else if (buckets == 5) {
+    mtext("Quintile", 1, 3, font=2, cex=1.2*scale)
+  } else {
+    mtext("Quantile", 1, 3, font=2, cex=1.2*scale)
+  }
+  mtext(ylab, 2, 4, font=2, cex=1.2*scale)
+  #grid(nx = NA, ny = NULL, lty = 1)
+
+  # get plot coordinates
+  xmin <- par("usr")[1]; xmax <- par("usr")[2]; x_delta <- xmax - xmin
+  ymin <- par("usr")[3]; ymax <- par("usr")[4]; y_delta <- ymax - ymin
+
+  # make title
+  if (!is.null(title)) {
+    rect(xmin, ymax+0.05*y_delta, xmax, ymax+0.15*y_delta,
+         border = NA, col='slateblue4')
+    text(0.5*(xmin+xmax), ymax+0.1*y_delta, labels=title, col='#ffffff', font=2, cex=scale)
+  }
+
+  # write size of data set
+  nrows_in_legend <- (length(validation_object_list)-1)/n_per_row
+  x <- graphics::grconvertX(0.02, from='ndc', to='user')
+  y <- graphics::grconvertY(0.02, from='ndc', to='user')
+  label <- paste0(number_of_obs, " data points used in analysis")
+  text(x, y, labels = label, adj = 0, cex = scale)
+
+  # add validation curves for all models
+  index <- 0
+  for (vobj in validation_object_list) {
+    index <- index + 1
+    with(vobj, {
+
+      # plot formatting arguments
+      # - line width
+      lwd <- ifelse(showpoints, 1, 6)
+      # - line type
+      lty <- 1
+      if (length(line_types)==1) {
+        lty=line_types
+      } else if (index <= length(line_types)) {
+        lty <- line_types[index]
+      }
+      # - color
+      if (index <= length(linecolors)) {
+        ccc <- linecolors[[index]]
+      } else {
+        ccc <- default_colors(length(validation_object_list))[index]
+      }
+
+      # add points and lines to plot for this model
+      if (use_normalizer) {
+        if (showpoints) points(seq_len(buckets), normalized_mean_response, pch = 19, col = ccc)
+        lines(seq_len(buckets), normalized_mean_response, col = ccc, lwd = lwd, lty = lty)
+      } else {
+        if (showpoints) points(seq_len(buckets), mean_response, pch = 19, col = ccc)
+        lines(seq_len(buckets), mean_response, col = ccc, lwd = lwd, lty = lty)
+      }
+
+      # add legend
+      if (plotroc && 'roc' %in% names(vobj)) {
+        label <- substitute(
+          paste(m,' (AUC = ', r[-le]^{+ue}, ')'),
+          list(m = model_name, r = round(roc, digits=3), le = round(roc_le, digits=3), ue = round(roc_ue, digits=3))
+        )
+      } else if (plotroc && 'gini' %in% names(vobj)) {
+        label <- substitute(
+          paste(m,' (Gini = ', g, '), (NRMSD = ', RMSD, ')'),
+          list(m = model_name, g = round(gini, digits=3), RMSD = round(NRMSD, digits = 3))
+        )
+      } else {
+        label <- model_name
+      }
+      row <- floor((index-1)/n_per_row)
+      column <- (index-1) %% n_per_row
+      xd <- x_delta/n_per_row
+      xlo <- xmin + column*xd
+      xhi <- xlo + xd
+      xm <- (xlo + xhi)/2
+      x1 <- xlo + 1*x_delta/20 # line start
+      x2 <- xlo + 3*x_delta/20 # line end
+      x3 <- xlo + 4*x_delta/20 # text start
+      y <- ymin - 0.25*y_delta - row*y_delta*0.06
+      lines(c(x1, x2), c(y, y), col = ccc, lwd = lwd, lty = lty)
+      text(x = x3, y = y, labels = label, adj = 0, col = ccc, cex = scale)
+
+      # add number of ones above the plotted point
+      if (numbers && length(validation_object_list)==1) {
+        if (use_normalizer) {
+          labels <- paste(formatC(100*normalized_mean_response, digits=3, format='fg'), '%', sep='')
+          text(seq_len(buckets), normalized_mean_response + 0.05*y_delta, labels, cex = scale)
+        } else if('gini' %in% names(validation_object_list[[1]])){
+          labels <- paste(formatC(mean_response, digits=3, format='fg'), sep='')
+          text(seq_len(buckets), mean_response + 0.05*y_delta, labels, cex = scale)
+        }else{
+          labels <- paste(formatC(100*mean_response, digits=3, format='fg'), '%', sep='')
+          text(seq_len(buckets), mean_response + 0.05*y_delta, labels, cex = scale)
+        }
+      }
+    })
+  }
+
+  # add lift if there are only 2 models
+  if (length(validation_object_list)==2) {
+    if (use_normalizer) {
+      a0 <- validation_object_list[[1]]$normalized_mean_response[1]
+      a1 <- validation_object_list[[2]]$normalized_mean_response[1]
+      b0 <- validation_object_list[[1]]$normalized_mean_response[buckets]
+      b1 <- validation_object_list[[2]]$normalized_mean_response[buckets]
+    } else {
+      a0 <- validation_object_list[[1]]$mean_response[1]
+      a1 <- validation_object_list[[2]]$mean_response[1]
+      b0 <- validation_object_list[[1]]$mean_response[buckets]
+      b1 <- validation_object_list[[2]]$mean_response[buckets]
+    }
+    lift_a <- paste0(round(100*(a0-a1)/a1),'%')
+    lift_b <- paste0(round(100*(b0-b1)/b1),'%')
+
+    dd <- 0.02*x_delta
+    lines(c(1, 1), c(a0, a1), lwd=2)
+    text(c(1-dd, 1-dd), c(0.5*(a0+a1), 0.5*(a0+a1)), labels = lift_a, adj = 1)
+    lines(c(buckets, buckets), c(b0, b1), lwd=2)
+    text(c(buckets+dd, buckets+dd), c(0.5*(b0+b1), 0.5*(b0+b1)), labels = lift_b, adj = 0, cex=0.9)
+  }
 }
 
 validate_model <- function(model) {
@@ -222,4 +417,12 @@ make_validation_object.numeric <- function(scores, validation_data, buckets,
 #' @rdname make_validation_plot
 #' @export
 validation_plot <- make_validation_plot
+
+default_colors <- function(num) {
+  colors <- c("#BE5050FF", "#9BBA5FFF", "#8065A1FF",
+    "#F5954FFF", "#1E2A36FF", "#43AC47FF")
+  if (num > length(colors)) {
+    c(colors, grDevices::rainbow(length(colors) - num))
+  } else { utils::head(colors, num) }
+}
 

@@ -9,8 +9,8 @@
 make_validation_plot(models, validation_data, buckets = 10,
   dep_var_name = "dep_var", id_var_name = "id", plot = TRUE, ...)
 
-output_validation_plot(validation_object, scale = 1, output_type = png,
-  filename = NULL, ...)
+output_validation_plot(validation_object, scale = 1,
+  output_type = grDevices::png, filename = NULL, ...)
 
 validation_plot(models, validation_data, buckets = 10,
   dep_var_name = "dep_var", id_var_name = "id", plot = TRUE, ...)
