@@ -2,14 +2,21 @@
 % Please edit documentation in R/make_validation_plot.R
 \name{plot.validation_object_list}
 \alias{plot.validation_object_list}
+\alias{plot_validation_object_list}
 \title{Plot a \code{validation_plot} object.}
 \usage{
-\method{plot}{validation_object_list}(validation_object_list,
-  ylab = "Default (\%)", title = NULL, linecolors = c(),
-  line_types = NULL, plotroc = TRUE, numbers = TRUE, showpoints = FALSE,
-  increment = 10, n_per_row = 1, scale = 1, use_normalizer = FALSE)
+\method{plot}{validation_object_list}(x, ...)
+
+plot_validation_object_list(validation_object_list, ylab = "Default (\%)",
+  title = NULL, linecolors = c(), line_types = NULL, plotroc = TRUE,
+  numbers = TRUE, showpoints = FALSE, increment = 10, n_per_row = 1,
+  scale = 1, use_normalizer = FALSE)
 }
 \arguments{
+\item{x}{object.}
+
+\item{...}{Internal.}
+
 \item{validation_object_list}{list. The validation objects to plot.}
 
 \item{ylab}{character. (For plot_type = "standard" only. Default is "Default (\%)")}

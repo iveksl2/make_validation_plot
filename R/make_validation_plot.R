@@ -75,6 +75,14 @@ output_validation_plot <- function(validation_object, scale = 1, output_type = g
   plot(validation_object, scale = scale, ...)
 }
 
+#' @rdname plot_validation_object_list
+#' @param x object. 
+#' @param ... Internal.
+#' @export
+plot.validation_object_list <- function(x, ...) {
+  plot_validation_object_list(validation_object_list = x, ...)
+}
+
 #' Plot a \code{validation_plot} object.
 #'
 #' @param validation_object_list list. The validation objects to plot.
@@ -96,7 +104,7 @@ output_validation_plot <- function(validation_object, scale = 1, output_type = g
 #' @param scale integer. If different than 1, used to scale output image.
 #' @param use_normalizer logical. 
 #' @export
-plot.validation_object_list <- function(validation_object_list, ylab = "Default (%)",
+plot_validation_object_list <- function(validation_object_list, ylab = "Default (%)",
                                         title = NULL, linecolors = c(), line_types = NULL,
                                         plotroc = TRUE, numbers = TRUE, showpoints = FALSE,
                                         increment = 10, n_per_row = 1, scale = 1,
