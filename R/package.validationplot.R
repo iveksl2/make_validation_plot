@@ -12,6 +12,6 @@
 #'
 #' @note The package was originally authored by physicist Ryland Ely.
 #' @name validationplot
-#' @import crayon ggplot2 pROC
+#' @import crayon pROC
 #' @docType package
 NULL

@@ -9,7 +9,7 @@
 make_validation_plot(models, validation_data, buckets = 10,
   dep_var_name = "dep_var", id_var_name = "id", plot = TRUE, ...)
 
-output_validation_plot(validation_object, scale = 1,
+output_validation_plot(validation_object_list, scale = 1,
   output_type = grDevices::png, filename = NULL, ...)
 
 validation_plot(models, validation_data, buckets = 10,
@@ -57,7 +57,7 @@ straight away, by default \code{TRUE}.}
 
 \item{...}{additional arguments to \code{\link[graphics]{plot}}.}
 
-\item{validation_object}{validation_object. Internal parameter.}
+\item{validation_object_list}{validation_object_list. Internal parameter.}
 
 \item{scale}{numeric. Adjust plot size, by default \code{1}.}
 
